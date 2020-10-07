@@ -1,7 +1,4 @@
 from tkinter import *
-import socket
-import json
-from threading import Thread
 
 window = Tk()
 
@@ -33,10 +30,6 @@ place_labels = []
 selected = ""
 ship = ""
 state = "place"
-connection_type = ""
-
-HOST = "127.0.0.1"
-PORT = 96
 
 vertical = False
 last_hover_pos = None
@@ -56,7 +49,6 @@ def click_event(event):
         if selected == "confirm":
             if len(player_fleet) == len(fleet):
                 state = "attack"
-                conn.sendall(json.dumps(player_fleet).encode())
 
         elif selected in fleet:
             place_labels[1]["text"] = "Ship: " + selected
@@ -198,10 +190,6 @@ def clear_board(event):
 
 
 def draw_board():
-    if connection_type == "host":
-        window.title("BattleShips: Player 1")
-    else:
-        window.title("BattleShips: Player 2")
     global state, place_labels, board
     board[1] = [
         [
@@ -271,45 +259,13 @@ def draw_board():
 def rotate(event):
     global vertical, state
     if state == "place":
-        if event.char == "r" or "MouseWheel" in str(event):
+        if event.char == "r":
             vertical = not vertical
             clear_board(None)
             if last_hover_pos is not None:
                 hover_enter(last_hover_pos)
 
-
-def send_state():
-    print("test")
-
-
 if __name__ == '__main__':
-    print("Connection Type: ")
-    if input().lower() == "host":
-        connection_type = "host"
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind((HOST, PORT))
-            s.listen(1)
-            conn, addr = s.accept()
-            with conn:
-                while True:
-                    data = conn.recv(1024)
-                    if not data:
-                        break
-                    if data == b'client connect':
-                        conn.sendall(b'connected')
-                        print("Client has connected")
-                        Thread(target=send_state).start()
-    else:
-        connection_type = "client"
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect((HOST, PORT))
-            s.send(b'client connect')
-            data = s.recv(1024)
-            if data == b'connected':
-                print("Connected to host")
-                Thread(target=send_state).start()
-
     draw_board()
-    window.bind("<MouseWheel>", rotate)
     window.bind("<Key>", rotate)
     window.mainloop()
