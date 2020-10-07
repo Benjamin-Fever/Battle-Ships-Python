@@ -1,6 +1,7 @@
 from tkinter import *
 import socket
 import json
+from threading import Thread
 
 window = Tk()
 
@@ -55,7 +56,7 @@ def click_event(event):
         if selected == "confirm":
             if len(player_fleet) == len(fleet):
                 state = "attack"
-                print(json.dumps(player_fleet))
+                conn.sendall(json.dumps(player_fleet).encode())
 
         elif selected in fleet:
             place_labels[1]["text"] = "Ship: " + selected
@@ -277,22 +278,28 @@ def rotate(event):
                 hover_enter(last_hover_pos)
 
 
+def send_state():
+    while True:
+        print()
+
+
 if __name__ == '__main__':
     print("Connection Type: ")
     if input().lower() == "host":
         connection_type = "host"
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
-            s.listen()
+            s.listen(1)
             conn, addr = s.accept()
             with conn:
-                print('Connected by', addr)
                 while True:
                     data = conn.recv(1024)
                     if not data:
                         break
                     if data == b'client connect':
                         conn.sendall(b'connected')
+                        print("Client has connected")
+                        Thread(target=send_state).start()
     else:
         connection_type = "client"
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -300,8 +307,10 @@ if __name__ == '__main__':
             s.send(b'client connect')
             data = s.recv(1024)
             if data == b'connected':
-                print("Connected to server")
+                print("Connected to host")
+                #Thread(target=send_state).start()
 
     draw_board()
     window.bind("<Key>", rotate)
+    window.bind("<MouseWheel>", rotate)
     window.mainloop()

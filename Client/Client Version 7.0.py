@@ -271,7 +271,7 @@ def draw_board():
 def rotate(event):
     global vertical, state
     if state == "place":
-        if event.char == "r":
+        if event.char == "r" or "MouseWheel" in str(event):
             vertical = not vertical
             clear_board(None)
             if last_hover_pos is not None:
@@ -279,8 +279,7 @@ def rotate(event):
 
 
 def send_state():
-    while True:
-        print()
+    print("test")
 
 
 if __name__ == '__main__':
@@ -311,5 +310,6 @@ if __name__ == '__main__':
                 Thread(target=send_state).start()
 
     draw_board()
+    window.bind("<MouseWheel>", rotate)
     window.bind("<Key>", rotate)
     window.mainloop()
