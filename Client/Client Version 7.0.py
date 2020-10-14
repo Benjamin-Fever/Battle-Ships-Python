@@ -1,6 +1,11 @@
 from tkinter import *
+import socket
+from threading import Thread
 
 window = Tk()
+
+host = "localhost"
+port = 6969
 
 fleet = {
     "battleship": {"char": "B", "size": 4},
@@ -266,6 +271,8 @@ def rotate(event):
                 hover_enter(last_hover_pos)
 
 if __name__ == '__main__':
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host, port))
     draw_board()
     window.bind("<Key>", rotate)
     window.mainloop()
