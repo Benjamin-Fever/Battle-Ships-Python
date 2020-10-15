@@ -1,6 +1,7 @@
 from tkinter import *
 import socket
 from threading import Thread
+from time import sleep
 
 window = Tk()
 
@@ -53,7 +54,7 @@ def click_event(event):
         selected = str(event.widget)[1:]
         if selected == "confirm":
             if len(player_fleet) == len(fleet):
-                state = "attack"
+                state = "wait"
 
         elif selected in fleet:
             place_labels[1]["text"] = "Ship: " + selected
@@ -270,9 +271,29 @@ def rotate(event):
             if last_hover_pos is not None:
                 hover_enter(last_hover_pos)
 
+
+def send_server_info():
+    global s, state
+    while True:
+        s.send(state.encode())
+        sleep(1)
+
+
+def get_server_info():
+    global s, state
+    while True:
+        z = s.recv(1024).decode()
+        if state == "wait" and z == "":
+            pass
+
+        sleep(1)
+
+
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host, port))
+    Thread(target=send_server_info).start()
+    Thread(target=get_server_info).start()
     draw_board()
     window.bind("<Key>", rotate)
     window.mainloop()
