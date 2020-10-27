@@ -2,6 +2,7 @@ from tkinter import *
 import socket
 from threading import Thread
 from time import sleep
+import json
 
 window = Tk()
 
@@ -277,20 +278,28 @@ def rotate(event):
 def send_server_info():
     global s, state
     while True:
-        s.send(state.encode())
+        s.send(b'state: ' + state.encode())
         sleep(1)
 
 
 def get_server_info():
-    global s, state, playerNum
+    global s, state, playerNum, player_fleet
     while True:
         z = s.recv(1024).decode()
         if state == "wait":
             if "fleet placed" in z:
                 if int(z[13:]) == 0:
                     playerNum = 0
+                    state = "sendFleet"
                 else:
                     playerNum = 1
+                    state = "recvFleet"
+        if state == "sendFleet":
+            data_string = json.dumps(player_fleet)
+            s.send(data_string.encode())
+            state = "recvFleet"
+        elif state == "recvFleet":
+            s.recv(1024)
 
         sleep(1)
 
