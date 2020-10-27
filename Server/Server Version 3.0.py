@@ -11,19 +11,9 @@ def handle_client(client):
     print("User has connected")
     while True:
         z = client["connection"].recv(1024)
+
         if b'state' in z:
             client["state"] = z.decode()[7:]
-            print(client["state"])
-
-        if client["state"] == "sendFleet" and not b'state' in z:
-            num = 0
-            for x in clients:
-                if x == client:
-                    break
-                else:
-                    num += 1
-            clients[num]["fleet"] = json.loads(z)
-            print(clients[num]["fleet"])
 
         if client["state"] == "wait":
             if clients[0]["state"] == "wait" and clients[1]["state"] == "wait":
@@ -35,6 +25,9 @@ def handle_client(client):
                         num += 1
                 client["connection"].send(b'fleet placed ' + str(num).encode())
 
+        if b'fleet0' in z or b'fleet1' in z:
+            z = z.decode()
+            clients[int(z[5:6])]["fleet"] = json.loads(z[8:])
 
 def client_connection():
     global clients

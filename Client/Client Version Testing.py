@@ -290,13 +290,18 @@ def get_server_info():
             if "fleet placed" in z:
                 if int(z[13:]) == 0:
                     playerNum = 0
-                    state = "sendFleet"
                 else:
                     playerNum = 1
-                    state = "recvFleet"
+
+                state = "sendFleet"
+
         if state == "sendFleet":
             data_string = json.dumps(player_fleet)
-            s.send(data_string.encode())
+            s.send(b'fleet' + str(playerNum).encode() + b': ' + data_string.encode())
+            sleep(1)
+            state = "recvFleet"
+
+
 
         sleep(1)
 
