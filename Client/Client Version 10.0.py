@@ -3,6 +3,7 @@ import socket
 from threading import Thread
 from time import sleep
 import json
+import os
 
 window = Tk()
 
@@ -51,7 +52,10 @@ def click_event(event):
                 board[1][location[0]][location[1]]["text"] = "X"
             else:
                 board[1][location[0]][location[1]]["text"] = "O"
-            s.send(b'attack: ' + str(location[0]).encode() + b', ' + str(location[1]).encode())
+            try:
+                s.send(b'attack: ' + str(location[0]).encode() + b', ' + str(location[1]).encode())
+            except ConnectionResetError:
+                os._exit(1)
             state = "wait"
 
     elif state == "place":
@@ -60,6 +64,7 @@ def click_event(event):
         if selected == "confirm":
             if len(player_fleet) == len(fleet):
                 state = "placed"
+                place_labels[1]["text"] = "Fleet placed"
 
         elif selected in fleet:
             place_labels[1]["text"] = "Ship: " + selected
@@ -279,14 +284,28 @@ def rotate(event):
 def send_server_info():
     global s, state
     while True:
-        s.send(b'state: ' + state.encode())
+        try:
+            s.send(b'state: ' + state.encode())
+        except ConnectionResetError:
+            os._exit(1)
+        sleep(1)
+
+
+def intro():
+    global place_labels
+    for z in ["Welcome to", "Battleships", "Click", "The", "Buttons", "Below", "To", "Place", "Your", "Fleet", "Push", "R", "To",
+              "Rotate", ""]:
+        place_labels[1]["text"] = z
         sleep(1)
 
 
 def get_server_info():
     global s, state, playerNum, player_fleet, enemy_fleet
     while True:
-        z = s.recv(1024).decode()
+        try:
+            z = s.recv(1024).decode()
+        except ConnectionResetError:
+            os._exit(1)
         if state == "placed":
             if "fleet placed" in z:
                 if int(z[13:]) == 0:
@@ -310,18 +329,30 @@ def get_server_info():
             else:
                 board[0][location[0]][location[1]]["bg"] = "blue"
             state = "attack"
+            place_labels[1]["text"] = "Your turn"
+
 
         if state == "recFleet":
-            data = s.recv(1024).decode()
+            try:
+                data = s.recv(1024).decode()
+            except ConnectionResetError:
+                os._exit(1)
             enemy_fleet = json.loads(data)
             if playerNum == 0:
                 state = "attack"
+                place_labels[1]["text"] = "Your turn"
             elif playerNum == 1:
                 state = "wait"
+                place_labels[1]["text"] = "Enemy Turn"
 
         elif state == "sendFleet":
+            for i in range(2, 10):
+                place_labels[i].destroy()
             data_string = json.dumps(player_fleet)
-            s.send(b'fleet' + str(playerNum).encode() + b': ' + data_string.encode())
+            try:
+                s.send(b'fleet' + str(playerNum).encode() + b': ' + data_string.encode())
+            except ConnectionResetError:
+                os._exit(1)
             sleep(1)
             state = "recFleet"
 
@@ -332,5 +363,6 @@ if __name__ == '__main__':
     Thread(target=send_server_info).start()
     Thread(target=get_server_info).start()
     draw_board()
+    Thread(target=intro).start()
     window.bind("<Key>", rotate)
     window.mainloop()
