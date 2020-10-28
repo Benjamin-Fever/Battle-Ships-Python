@@ -13,10 +13,17 @@ def handle_client(client):
         z = client["connection"].recv(1024)
 
         if b'state' in z:
-            client["state"] = z.decode()[7:]
+            num = 0
+            for x in clients:
+                if x == client:
+                    break
+                else:
+                    num += 1
+            clients[num]["state"] = client["state"] = z.decode()[7:]
 
-        if client["state"] == "wait":
-            if clients[0]["state"] == "wait" and clients[1]["state"] == "wait":
+
+        if client["state"] == "placed":
+            if clients[0]["state"] == "placed" and clients[1]["state"] == "placed":
                 num = 0
                 for x in clients:
                     if x == client:
@@ -41,11 +48,25 @@ def handle_client(client):
                 client["connection"].send(json.dumps(clients[0]["fleet"]).encode())
 
 
+def debug(client):
+    global clients
+    while True:
+        num = 0
+        for x in clients:
+            if x == client:
+                break
+            else:
+                num += 1
+        print(clients[num]["state"])
+        sleep(3)
+
+
 def client_connection():
     global clients
     while True:
         clients.append({"connection": s.accept()[0], "state": "", "fleet": None})
         Thread(target=handle_client, args=(clients[len(clients) - 1],)).start()
+        Thread(target=debug, args=(clients[len(clients) - 1],)).start()
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

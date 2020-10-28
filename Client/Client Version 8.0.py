@@ -18,15 +18,7 @@ fleet = {
     "submarine1": {"char": "S", "size": 1},
     "submarine2": {"char": "S", "size": 1}
 }
-enemy_fleet = {
-    "Battleship": [(1, 2), (1, 3), (1, 4), (1, 5)],
-    "Destroyer1": [(8, 1), (8, 2)],
-    "Destroyer2": [(0, 8), (0, 9)],
-    "Cruiser": [(5, 9), (6, 9), (7, 9)],
-    "Aircraft Carrier": [(7, 3), (7, 4), (7, 5), (7, 6), (7, 7)],
-    "Submarine1": [(5, 5)],
-    "Submarine2": [(5, 8)],
-}
+enemy_fleet = None
 player_fleet = {}
 
 board = [
@@ -294,14 +286,14 @@ def get_server_info():
                     playerNum = 1
 
                 state = "sendFleet"
+        if state == "recvFleet":
+            print(s.recv(1024))
 
         if state == "sendFleet":
             data_string = json.dumps(player_fleet)
             s.send(b'fleet' + str(playerNum).encode() + b': ' + data_string.encode())
             sleep(1)
             state = "recvFleet"
-
-
 
         sleep(1)
 
