@@ -18,7 +18,7 @@ fleet = {
     "submarine1": {"char": "S", "size": 1},
     "submarine2": {"char": "S", "size": 1}
 }
-enemy_fleet = None
+enemy_fleet = {}
 player_fleet = {}
 
 board = [
@@ -37,12 +37,19 @@ last_hover_pos = None
 
 
 def click_event(event):
-    global selected, place_labels, ship, player_fleet, fleet, board, state
+    global selected, place_labels, ship, player_fleet, fleet, board, state, enemy_fleet
     if state == "attack":
-        if "pFleet" in str(event.widget) or "eFleet" in str(event.widget):
-            location = {"board": str(event.widget)[1:7],
-                        "pos": (int(str(event.widget)[9:10]), int(str(event.widget)[12:13]))}
-            print(location)
+        if "eFleet" in str(event.widget):
+            location = (int(str(event.widget)[9:10]), int(str(event.widget)[12:13]))
+            hit = False
+            for ship in enemy_fleet:
+                for pos in enemy_fleet[ship]:
+                    if location == (pos[0], pos[1]):
+                        hit = True
+                        break
+            if hit:
+                print("Ship Hit")
+
 
     elif state == "place":
         collide = False
@@ -126,7 +133,6 @@ def click_event(event):
                                             positions.append((x - v, y))
                                             v += 1
                     player_fleet[ship] = positions
-                    print(player_fleet)
                     clear_board(None)
                     ship = ""
 
@@ -288,7 +294,10 @@ def get_server_info():
                 state = "sendFleet"
         if state == "recvFleet":
             enemy_fleet = json.loads(s.recv(1024).decode())
-            state = "wait"
+            if playerNum == 0:
+                state = "attack"
+            else:
+                state = "wait"
 
         if state == "sendFleet":
             data_string = json.dumps(player_fleet)

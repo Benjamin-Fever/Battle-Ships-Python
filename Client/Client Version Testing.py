@@ -37,12 +37,18 @@ last_hover_pos = None
 
 
 def click_event(event):
-    global selected, place_labels, ship, player_fleet, fleet, board, state
+    global selected, place_labels, ship, player_fleet, fleet, board, state, enemy_fleet
     if state == "attack":
-        if "pFleet" in str(event.widget) or "eFleet" in str(event.widget):
-            location = {"board": str(event.widget)[1:7],
-                        "pos": (int(str(event.widget)[9:10]), int(str(event.widget)[12:13]))}
-            print(location)
+        if "eFleet" in str(event.widget):
+            location = (int(str(event.widget)[9:10]), int(str(event.widget)[12:13]))
+            hit = False
+            print(enemy_fleet)
+            for ship in enemy_fleet:
+                for pos in ship:
+                    print(pos)
+            if hit:
+                print("Ship Hit")
+
 
     elif state == "place":
         collide = False
@@ -288,7 +294,11 @@ def get_server_info():
                 state = "sendFleet"
         if state == "recvFleet":
             enemy_fleet = json.loads(s.recv(1024).decode())
-            state = "wait"
+            print(enemy_fleet)
+            if playerNum == 0:
+                state = "attack"
+            else:
+                state = "wait"
 
         if state == "sendFleet":
             data_string = json.dumps(player_fleet)

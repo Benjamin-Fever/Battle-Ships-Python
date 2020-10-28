@@ -21,7 +21,6 @@ def handle_client(client):
                     num += 1
             clients[num]["state"] = client["state"] = z.decode()[7:]
 
-
         if client["state"] == "placed":
             if clients[0]["state"] == "placed" and clients[1]["state"] == "placed":
                 num = 0
@@ -34,7 +33,7 @@ def handle_client(client):
 
         if b'fleet0' in z or b'fleet1' in z:
             z = z.decode()
-            clients[int(z[5:6])]["fleet"] = json.loads(z[8:])
+            client["fleet"] = clients[int(z[5:6])]["fleet"] = json.loads(z[8:])
         if client["state"] == "recvFleet":
             num = 0
             for x in clients:
