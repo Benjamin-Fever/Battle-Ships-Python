@@ -62,7 +62,7 @@ def client_connection():
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = "localhost"
+host = "10.70.22.21"
 port = 6969
 s.bind((host, port))
 

@@ -6,7 +6,7 @@ import json
 
 window = Tk()
 
-host = "192.168.1.68"
+host = "10.70.22.21"
 port = 6969
 
 fleet = {
