@@ -6,57 +6,50 @@ import json
 clients = []
 
 
+def client_index(client):
+    num = 0
+    for x in clients:
+        if x == client:
+            break
+        else:
+            num += 1
+    return num
+
+
 def handle_client(client):
     global clients
-    print("User has connected")
     while True:
         z = client["connection"].recv(1024)
 
         if b'state' in z:
-            num = 0
-            for x in clients:
-                if x == client:
-                    break
-                else:
-                    num += 1
-            clients[num]["state"] = client["state"] = z.decode()[7:]
+            clients[client_index(client)]["state"] = client["state"] = z.decode()[7:]
+
+        elif b'fleet0' in z or b'fleet1' in z:
+            z = z.decode()
+            client["fleet"] = clients[int(z[5:6])]["fleet"] = json.loads(z[8:])
+
+        elif b'attack:' in z:
+            if client_index(client) == 0:
+                clients[1]["connection"].send(z[8:9] + b', ' + z[11:12])
+            else:
+                clients[0]["connection"].send(z[8:9] + b', ' + z[11:12])
 
         if client["state"] == "placed":
             if clients[0]["state"] == "placed" and clients[1]["state"] == "placed":
-                num = 0
-                for x in clients:
-                    if x == client:
-                        break
-                    else:
-                        num += 1
-                client["connection"].send(b'fleet placed ' + str(num).encode())
+                client["connection"].send(b'fleet placed ' + str(client_index(client)).encode())
 
-        if b'fleet0' in z or b'fleet1' in z:
-            z = z.decode()
-            client["fleet"] = clients[int(z[5:6])]["fleet"] = json.loads(z[8:])
-        if client["state"] == "recvFleet":
-            num = 0
-            for x in clients:
-                if x == client:
-                    break
-                else:
-                    num += 1
-            if num == 0:
+        elif client["state"] == "recFleet":
+            if client_index(client) == 0:
                 client["connection"].send(json.dumps(clients[1]["fleet"]).encode())
-            else:
+
+            elif client_index(client) == 1:
                 client["connection"].send(json.dumps(clients[0]["fleet"]).encode())
 
 
 def debug(client):
     global clients
     while True:
-        num = 0
-        for x in clients:
-            if x == client:
-                break
-            else:
-                num += 1
-        print(clients[num]["state"])
+        print(clients[client_index(client)]["state"])
         sleep(3)
 
 

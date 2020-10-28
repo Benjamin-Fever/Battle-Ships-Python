@@ -37,7 +37,7 @@ last_hover_pos = NONE
 
 
 def click_event(event):
-    global selected, place_labels, ship, player_fleet, fleet, board, state, enemy_fleet
+    global selected, place_labels, ship, player_fleet, fleet, board, state, enemy_fleet, s
     if state == "attack":
         if "eFleet" in str(event.widget):
             location = (int(str(event.widget)[9:10]), int(str(event.widget)[12:13]))
@@ -48,7 +48,11 @@ def click_event(event):
                         hit = True
                         break
             if hit:
-                print("Ship Hit")
+                board[1][location[0]][location[1]]["text"] = "X"
+            else:
+                board[1][location[0]][location[1]]["text"] = "O"
+            s.send(b'attack: ' + str(location[0]).encode() + b', ' + str(location[1]).encode())
+            state = "wait"
 
     elif state == "place":
         collide = False
@@ -237,7 +241,7 @@ def draw_board():
             Label(text="Place your fleet"),
             Label(text=""),
             Label(window, width=12, bd=2, relief=GROOVE, name="destroyer1", text="Destroyer1"),
-            Label(window, width=12, bd=2, relief=GROOVE, name="destroyer2", text="Destoyer2"),
+            Label(window, width=12, bd=2, relief=GROOVE, name="destroyer2", text="Destroyer2"),
             Label(window, width=12, bd=2, relief=GROOVE, name="battleship", text="Battleship"),
             Label(window, width=12, bd=2, relief=GROOVE, name="cruiser", text="Cruiser"),
             Label(window, width=12, bd=2, relief=GROOVE, name="aircraft carrier", text="Aircraft Carrier"),
@@ -287,22 +291,29 @@ def get_server_info():
             if "fleet placed" in z:
                 if int(z[13:]) == 0:
                     playerNum = 0
+                    window.title("Player 1")
                 else:
                     playerNum = 1
-
+                    window.title("Player 2")
                 state = "sendFleet"
-        if state == "recvFleet":
-            enemy_fleet = json.loads(s.recv(1024).decode())
+        elif state == "wait":
+            print(z)
+
+        if state == "recFleet":
+            l = s.recv(1024).decode()
+            enemy_fleet = json.loads(l)
             if playerNum == 0:
+                print(enemy_fleet)
                 state = "attack"
-            else:
+            elif playerNum == 1:
+                print(enemy_fleet)
                 state = "wait"
 
-        if state == "sendFleet":
+        elif state == "sendFleet":
             data_string = json.dumps(player_fleet)
             s.send(b'fleet' + str(playerNum).encode() + b': ' + data_string.encode())
             sleep(1)
-            state = "recvFleet"
+            state = "recFleet"
 
         sleep(1)
 
