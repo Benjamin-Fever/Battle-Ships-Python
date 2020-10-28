@@ -33,7 +33,7 @@ state = "place"
 playerNum = 0
 
 vertical = False
-last_hover_pos = None
+last_hover_pos = NONE
 
 
 def click_event(event):
@@ -49,7 +49,6 @@ def click_event(event):
                         break
             if hit:
                 print("Ship Hit")
-
 
     elif state == "place":
         collide = False
@@ -175,9 +174,9 @@ def hover_enter(event):
                                         v += 1
 
 
+# noinspection PyUnusedLocal
 def clear_board(event):
     global state, board, player_fleet, fleet
-    event = None
     _ship = None
     if state == "place":
         for x in range(len(board[0])):
