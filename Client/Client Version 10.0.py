@@ -293,7 +293,8 @@ def send_server_info():
 
 def intro():
     global place_labels
-    for z in ["Welcome to", "Battleships", "Click", "The", "Buttons", "Below", "To", "Place", "Your", "Fleet", "Push", "R", "To",
+    for z in ["Welcome to", "Battleships", "Click", "The", "Buttons", "Below", "To", "Place", "Your", "Fleet", "Push",
+              "R", "To",
               "Rotate", ""]:
         place_labels[1]["text"] = z
         sleep(1)
@@ -330,7 +331,6 @@ def get_server_info():
                 board[0][location[0]][location[1]]["bg"] = "blue"
             state = "attack"
             place_labels[1]["text"] = "Your turn"
-
 
         if state == "recFleet":
             try:
