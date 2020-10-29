@@ -76,9 +76,5 @@ def draw_board():
         Label(window, width=12, bd=2, relief=GROOVE, name="", text="Submarine1").grid(row=6, column=13, padx=(0, 20))
         Label(window, width=12, bd=2, relief=GROOVE, name="", text="Submarine2").grid(row=7, column=12, padx=(20, 0))
 
-
-
-
-
 draw_board()
 window.mainloop()

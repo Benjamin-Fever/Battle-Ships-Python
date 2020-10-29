@@ -94,6 +94,7 @@ def click_event(event):
             if len(player_fleet) == len(fleet):
                 state = "placed"
                 place_labels[1]["text"] = "Fleet placed"
+                return
 
         elif selected in fleet:
             place_labels[1]["text"] = "Ship: " + selected
