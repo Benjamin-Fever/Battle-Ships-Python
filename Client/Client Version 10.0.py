@@ -7,7 +7,7 @@ import os
 
 window = Tk()
 
-host = "10.70.22.21"
+host = "localhost"
 port = 6969
 
 fleet = {

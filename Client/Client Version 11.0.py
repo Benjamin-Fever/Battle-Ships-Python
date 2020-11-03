@@ -388,6 +388,11 @@ def get_server_info():
                 state = "wait"
                 place_labels[0]["text"] = "Enemy Turn"
             place_labels[1]["text"] = ""
+            Thread(target=text, args=(
+                [
+                    "Click one", "of squares", "on the top", "to fire when it", "is your turn.",
+                    "Wait for the opposition", "to fire after", "you have made your move", ""
+                ], 2,)).start()
 
         elif state == "sendFleet":
             for i in range(2, 10):

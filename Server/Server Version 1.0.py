@@ -2,17 +2,17 @@ import socket
 from threading import Thread
 
 
-def penis(client):
+def handle_client(client):
     print("Connection made!")
     while True:
-        cum = client.recv(1024)
-        print(cum.decode())
+        data = client.recv(1024)
+        print(data.decode())
 
 
 def client_connection():
     while True:
         client = s.accept()[0]
-        Thread(target=penis, args=(client,)).start()
+        Thread(target=handle_client, args=(client,)).start()
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
